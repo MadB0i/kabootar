@@ -1,0 +1,41 @@
+{
+  "name": "kabootar",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Zero-backend animated greeting-link generator with secret questions and interactive scenes",
+  "keywords": [
+    "greeting",
+    "card",
+    "birthday",
+    "diwali",
+    "bihu",
+    "eid",
+    "romantic",
+    "sorry",
+    "no-backend",
+    "encrypted"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "framer-motion": "^14.12.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "autoprefixer": "^10.6.2",
+    "oxlint": "^1.90.0",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.6"
+  }
+}
