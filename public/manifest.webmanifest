@@ -1,0 +1,13 @@
+{
+  "name": "Kabootar — Greeting Links",
+  "short_name": "Kabootar",
+  "description": "Animated greeting cards that live inside a single link. No app, no signup, no server.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0b12",
+  "theme_color": "#0b0b12",
+  "icons": [
+    { "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

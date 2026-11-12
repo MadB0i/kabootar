@@ -86,7 +86,7 @@ export default function MobileViewer({ data }) {
       {/* Progress bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-black/20 z-20 pointer-events-none">
         <div
-          className="h-full bg-white/80 transition-all duration-300"
+          className="h-full bg-gradient-to-r from-pink-400 via-violet-300 to-cyan-300 transition-all duration-300"
           style={{ width: `${((current + 1) / totalCards) * 100}%` }}
         />
       </div>
@@ -123,7 +123,7 @@ export default function MobileViewer({ data }) {
 }
 
 function renderCard({ current, lines, data, theme, occasionLabel, totalCards, isReply }) {
-  const block = 'text-center text-white bg-black/25 backdrop-blur-sm rounded-2xl px-6 py-6 max-w-md'
+  const block = 'text-center text-white bg-black/35 backdrop-blur-md rounded-3xl px-6 py-7 ring-1 ring-white/15 shadow-2xl max-w-md'
   if (current === 0) {
     const firstLine = fillNames(lines[0] || '', data)
     // Don't show the receiver's name twice: skip the heading when the first
@@ -171,17 +171,25 @@ function DynamicScene({ sceneKey, data, animated }) {
 function ReplyCard({ data, theme }) {
   const replyText = encodeURIComponent(`Hey ${data.to}! Saw your kabootar 💌 — made by ${data.from}`)
   return (
-    <div className="text-center text-white bg-black/25 backdrop-blur-sm rounded-2xl px-6 py-8 max-w-md">
+    <div className="text-center text-white bg-black/35 backdrop-blur-md rounded-3xl px-6 py-8 ring-1 ring-white/15 shadow-2xl max-w-md">
       <p className="text-2xl font-bold mb-6" style={{ color: theme.text }}>💌</p>
       <p className="text-lg mb-6" style={{ color: theme.text }}>Want to send one back?</p>
       <a
         href={`https://wa.me/?text=${replyText}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block px-8 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold shadow-lg transition-colors pointer-events-auto"
+        className="inline-block px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-400 hover:brightness-110 text-white rounded-full font-bold shadow-lg transition pointer-events-auto"
       >
         Reply via WhatsApp 💬
       </a>
+      <p className="mt-4">
+        <a
+          href="#/"
+          className="text-sm text-white/70 hover:text-white underline underline-offset-4 pointer-events-auto transition-colors"
+        >
+          Make your own 🕊️
+        </a>
+      </p>
     </div>
   )
 }

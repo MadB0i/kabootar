@@ -117,7 +117,7 @@ export default function DesktopViewer({ data }) {
               key={i}
               className="h-screen snap-start flex items-center justify-center px-12"
             >
-              <CardBlock transitionsOn={transitionsOn} className="relative max-w-2xl text-center bg-black/25 backdrop-blur-sm rounded-3xl px-10 py-10">
+              <CardBlock transitionsOn={transitionsOn} className="relative max-w-2xl text-center bg-black/35 backdrop-blur-md rounded-3xl px-10 py-10 ring-1 ring-white/15 shadow-2xl">
                 {i === 0 && occasionLabel && (
                   <p className="text-white/70 text-sm uppercase tracking-widest mb-4">{occasionLabel}</p>
                 )}
@@ -137,17 +137,25 @@ export default function DesktopViewer({ data }) {
 
         {/* Reply section */}
         <section className="h-screen snap-start flex items-center justify-center">
-          <CardBlock transitionsOn={transitionsOn} className="text-center bg-black/25 backdrop-blur-sm rounded-3xl px-10 py-10">
+          <CardBlock transitionsOn={transitionsOn} className="text-center bg-black/35 backdrop-blur-md rounded-3xl px-10 py-10 ring-1 ring-white/15 shadow-2xl">
             <p className="text-5xl mb-4">💌</p>
             <p className="text-xl text-white/80 mb-6">Want to send one back?</p>
             <a
               href={replyHref(data)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-8 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold shadow-lg transition-colors pointer-events-auto"
+              className="inline-block px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-400 hover:brightness-110 text-white rounded-full font-bold shadow-lg transition pointer-events-auto"
             >
               Reply via WhatsApp 💬
             </a>
+            <p className="mt-4">
+              <a
+                href="#/"
+                className="text-sm text-white/70 hover:text-white underline underline-offset-4 pointer-events-auto transition-colors"
+              >
+                Make your own 🕊️
+              </a>
+            </p>
           </CardBlock>
         </section>
       </div>

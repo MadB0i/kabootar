@@ -1,6 +1,53 @@
 /* Tailwind CSS v4 — import the framework */
 @import "tailwindcss";
 
+/* ── Kabootar design tokens ─────────────────────────────────────────── */
+body {
+  font-family: 'Outfit', ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+::selection {
+  background: rgba(244, 114, 182, 0.35);
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+/* Gradient headline text */
+.gradient-text {
+  background: linear-gradient(90deg, #f472b6, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Animated aurora blobs (creator landing) */
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  will-change: transform;
+}
+
+@keyframes aurora-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(14%, 10%) scale(1.25); }
+}
+@keyframes aurora-b {
+  0%, 100% { transform: translate(0, 0) scale(1.1); }
+  50%      { transform: translate(-12%, 14%) scale(0.9); }
+}
+@keyframes aurora-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(10%, -12%) scale(1.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none !important; }
+}
+
 /* Custom keyframe animations */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(12px); }
