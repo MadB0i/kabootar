@@ -5,6 +5,8 @@ import { encryptPayload } from '../lib/crypto'
 import { occasions } from '../templates'
 import { fillNames } from '../lib/fillNames'
 import Confetti from '../components/effects/Confetti'
+import StoryCardModal from '../components/StoryCardModal'
+import { playSparkle, playHeartPop, triggerHaptic } from '../lib/sound'
 
 const inputCls = 'w-full px-4 py-3 rounded-2xl bg-white/5 ring-1 ring-white/10 text-white placeholder-white/30 outline-none focus:ring-2 focus:ring-pink-400/70 transition'
 const labelCls = 'block text-sm font-medium text-white/70 mb-2'
@@ -23,12 +25,15 @@ export default function Creator() {
   const [message, setMessage] = useState(() => defaultMessagesFor(occasions.find((o) => o.id === 'sorry')))
   const [theme, setTheme] = useState(0)
   const [animated, setAnimated] = useState(true)
+  const [bgm, setBgm] = useState('lofi')
   const [music, setMusic] = useState('')
   const [unlockAt, setUnlockAt] = useState('')
   const [secretEnabled, setSecretEnabled] = useState(false)
   const [secretQ, setSecretQ] = useState('')
   const [secretA, setSecretA] = useState('')
   const [generatedLink, setGeneratedLink] = useState('')
+  const [showStoryModal, setShowStoryModal] = useState(false)
+  const [previewCardIdx, setPreviewCardIdx] = useState(0)
   const [copied, setCopied] = useState(false)
   const [toast, setToast] = useState(null) // { id, msg }
   const [confettiOn, setConfettiOn] = useState(false)
@@ -79,16 +84,21 @@ export default function Creator() {
         const obj = {
           v: 1,
           occasion: occasionData?.id,
+          occasionLabel: occasionData?.label,
+          scene: occasionData?.scene || 'default',
           theme: currentTheme,
           animated,
           secret,
         }
+        if (bgm && bgm !== 'none') obj.bgm = bgm
         if (unlockAt) obj.unlockAt = new Date(unlockAt).toISOString()
         if (music.trim()) obj.music = music.trim()
         const encoded = encodeData(obj)
         const url = `${window.location.origin}${window.location.pathname}#/v/${encoded}`
         setGeneratedLink(url)
         setCopied(false)
+        burstConfetti()
+        playSparkle()
         showToast('Secret link ready — the answer unlocks it 🔐')
         return
       } catch {
@@ -100,18 +110,22 @@ export default function Creator() {
       v: 1,
       occasion: occasionData?.id,
       occasionLabel: occasionData?.label,
+      scene: occasionData?.scene || 'default',
       from: from.trim(),
       to: to.trim(),
       message: message.trim(),
       theme: currentTheme,
       animated,
     }
+    if (bgm && bgm !== 'none') obj.bgm = bgm
     if (music.trim()) obj.music = music.trim()
     if (unlockAt) obj.unlockAt = new Date(unlockAt).toISOString()
     const encoded = encodeData(obj)
     const url = `${window.location.origin}${window.location.pathname}#/v/${encoded}`
     setGeneratedLink(url)
     setCopied(false)
+    burstConfetti()
+    playSparkle()
     showToast('Link ready — make someone\u2019s day 🕊️')
   }
 
@@ -149,12 +163,16 @@ export default function Creator() {
     window.open(generatedLink, '_blank')
   }
 
-  // Live mini-preview mirrors the viewer's card 0 (including name dedup).
-  const previewLine = fillNames(message.split('\n')[0] || '', {
-    to: to.trim() || 'them',
-    from: from.trim() || 'a friend',
-  })
-  const previewShowsHeading = !(previewLine && previewLine.includes(to.trim())) && !!to.trim()
+  // Live mini-preview mirrors the viewer's cards with pagination.
+  const messageLines = message.split('\n').filter(Boolean)
+  const previewLines = messageLines.map((line) =>
+    fillNames(line, {
+      to: to.trim() || 'them',
+      from: from.trim() || 'a friend',
+    })
+  )
+  const firstPreviewLine = previewLines[0] || ''
+  const previewShowsHeading = !(firstPreviewLine && firstPreviewLine.includes(to.trim())) && !!to.trim()
 
   return (
     <div className="min-h-screen bg-[#0b0b12] text-white relative overflow-x-hidden">
@@ -175,9 +193,19 @@ export default function Creator() {
         {/* Nav */}
         <header className="flex items-center justify-between py-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-pink-500 via-violet-500 to-cyan-400 p-[2px] shadow-lg shadow-pink-500/20">
-              <div className="w-full h-full rounded-[14px] bg-[#0b0b12] flex items-center justify-center text-lg">🕊️</div>
-            </div>
+            <button
+              onClick={() => {
+                burstConfetti()
+                playHeartPop()
+                playSparkle()
+                triggerHaptic([30, 20, 50])
+                showToast('🕊️ Coo! The Kabootar is flying!')
+              }}
+              className="w-10 h-10 rounded-2xl bg-gradient-to-br from-pink-500 via-violet-500 to-cyan-400 p-[2px] shadow-lg shadow-pink-500/20 active:scale-95 transition cursor-pointer"
+              title="Tap the Kabootar! 🕊️"
+            >
+              <div className="w-full h-full rounded-[14px] bg-[#0b0b12] flex items-center justify-center text-lg hover:scale-110 transition-transform">🕊️</div>
+            </button>
             <span className="text-lg font-bold tracking-tight">Kabootar</span>
           </div>
           <span className="text-[11px] font-medium px-3 py-1.5 rounded-full bg-white/5 ring-1 ring-white/10 text-white/60">zero backend · links carry everything</span>
@@ -272,23 +300,79 @@ export default function Creator() {
 
           {/* Live preview */}
           <div>
-            <label className={labelCls}>Live preview 👀</label>
-            <div className="rounded-2xl overflow-hidden ring-1 ring-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-white/70">Live Deck Preview 👀</label>
+              {messageLines.length > 1 && (
+                <div className="flex items-center gap-1.5 text-xs text-white/60">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewCardIdx((c) => Math.max(0, c - 1))}
+                    disabled={previewCardIdx === 0}
+                    className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-25 flex items-center justify-center transition"
+                  >
+                    ‹
+                  </button>
+                  <span className="font-mono">{previewCardIdx + 1}/{messageLines.length}</span>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewCardIdx((c) => Math.min(messageLines.length - 1, c + 1))}
+                    disabled={previewCardIdx === messageLines.length - 1}
+                    className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-25 flex items-center justify-center transition"
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-xl">
               <div
-                className="h-40 flex flex-col items-center justify-center px-6 text-center"
+                className="h-44 flex flex-col items-center justify-center px-6 text-center transition-all duration-300 relative"
                 style={{ background: `linear-gradient(135deg, ${activeTheme.from}, ${activeTheme.to})` }}
               >
                 <p className="text-[11px] uppercase tracking-[.25em] opacity-80" style={{ color: activeTheme.text }}>
                   {occasionData?.label}
                 </p>
-                {previewShowsHeading && (
+                {previewShowsHeading && previewCardIdx === 0 && (
                   <p className="text-3xl font-bold mt-1" style={{ color: activeTheme.text }}>{to.trim()}</p>
                 )}
-                <p className="text-base mt-1.5 line-clamp-2" style={{ color: activeTheme.text }}>
-                  {previewLine || 'Your message…'}
+                <p className="text-base mt-1.5 line-clamp-3 font-medium max-w-sm" style={{ color: activeTheme.text }}>
+                  {previewLines[previewCardIdx] || 'Your message…'}
                 </p>
+                {previewCardIdx === messageLines.length - 1 && from.trim() && (
+                  <p className="text-xs mt-2 opacity-70" style={{ color: activeTheme.text }}>— {from.trim()}</p>
+                )}
               </div>
-              <p className="text-[11px] text-white/40 px-3 py-2 bg-black/25">This is the first thing they'll see</p>
+              <p className="text-[11px] text-white/40 px-3 py-2 bg-black/25 flex items-center justify-between">
+                <span>{previewCardIdx === 0 ? "First card they'll see" : `Card ${previewCardIdx + 1}`}</span>
+                <span>{messageLines.length > 1 ? 'Use ‹ › to page through deck' : 'One-card message'}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Ambient BGM Selector */}
+          <div>
+            <label className={labelCls}>🎧 Ambient Soundtrack (Generative Web Audio)</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { id: 'lofi', label: '🎶 Lo-Fi Chill', desc: 'Warm Rhodes chords' },
+                { id: 'celestial', label: '🌙 Celestial Box', desc: 'Dreamy music box' },
+                { id: 'rain', label: '🌧️ Calming Rain', desc: 'Gentle binaural rain' },
+                { id: 'none', label: '🔇 Silent', desc: 'No background audio' },
+              ].map((opt) => (
+                <button
+                  type="button"
+                  key={opt.id}
+                  onClick={() => setBgm(opt.id)}
+                  className={`p-3 rounded-2xl text-left border transition-all ${
+                    bgm === opt.id
+                      ? 'bg-white/15 border-pink-400 shadow-md ring-1 ring-pink-400/50'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10'
+                  }`}
+                >
+                  <p className="font-semibold text-xs text-white">{opt.label}</p>
+                  <p className="text-[10px] text-white/50 mt-0.5">{opt.desc}</p>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -397,6 +481,12 @@ export default function Creator() {
                   >
                     👁️ Preview
                   </button>
+                  <button
+                    onClick={() => setShowStoryModal(true)}
+                    className="py-3 col-span-2 sm:col-span-4 rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 hover:brightness-110 active:scale-[.99] text-gray-950 font-extrabold text-sm shadow-xl flex items-center justify-center gap-2 transition"
+                  >
+                    <span>📸</span> Download Story Card & QR (Instagram / WhatsApp Status)
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -424,6 +514,18 @@ export default function Creator() {
           <a href="https://github.com/madb0i/kabootar" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-white/60">GitHub</a>
         </footer>
       </div>
+
+      {/* Story Card & QR Modal */}
+      {showStoryModal && (
+        <StoryCardModal
+          url={generatedLink}
+          to={to.trim()}
+          from={from.trim()}
+          occasionLabel={occasionData?.label}
+          theme={activeTheme}
+          onClose={() => setShowStoryModal(false)}
+        />
+      )}
 
       {/* Toast */}
       <AnimatePresence>

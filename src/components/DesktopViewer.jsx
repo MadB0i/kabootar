@@ -10,6 +10,9 @@ const SCENES = {
   birthday: () => import('./scenes/BirthdayScene'),
   romantic: () => import('./scenes/RomanticScene'),
   newyear: () => import('./scenes/NewYearScene'),
+  scratch: () => import('./scenes/ScratchScene'),
+  roast: () => import('./scenes/RoastScene'),
+  chai: () => import('./scenes/ChaiScene'),
   default: () => import('./scenes/DefaultScene'),
 }
 
@@ -21,7 +24,7 @@ export default function DesktopViewer({ data }) {
   const transitionsOn = data.animated !== false && !reducedMotion
 
   const occasion = getOccasion(data.occasion)
-  const sceneKey = occasion?.scene || 'default'
+  const sceneKey = data.scene || occasion?.scene || 'default'
   const theme = getTheme(data)
   const occasionLabel = occasion?.label || data.occasionLabel || ''
   const total = lines.length + 1 // +1 for reply section
@@ -194,7 +197,7 @@ function DynamicScene({ sceneKey, data, animated }) {
 }
 
 function replyHref(data) {
-  const replyText = encodeURIComponent(`Hey ${data.to}! Saw your kabootar 💌 — made by ${data.from}`)
+  const replyText = encodeURIComponent(`Hey ${data.from || 'there'}! Loved your kabootar 💌`)
   return `https://wa.me/?text=${replyText}`
 }
 

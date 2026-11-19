@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import useCanvasSize from '../../lib/useCanvasSize'
 import Confetti from '../effects/Confetti'
+import { playCandleBlow, playSparkle } from '../../lib/sound'
 
 const CANDLE_COUNT = 5
 
@@ -70,6 +71,8 @@ export default function BirthdayScene({ animated }) {
   const blowOut = () => {
     if (blownRef.current) return
     blownRef.current = true
+    playCandleBlow()
+    setTimeout(() => playSparkle(), 300)
     micCleanupRef.current?.()
     candlesRef.current.forEach((c) => { c.flameActive = false })
     setBlown(true)

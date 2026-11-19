@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import useCanvasSize from '../../lib/useCanvasSize'
+import FloatingHearts from '../effects/FloatingHearts'
 
 /** Sample points from text rendered on an offscreen canvas.
  *  The name forms in the upper third so viewer cards never cover it. */
@@ -76,24 +77,26 @@ export default function RomanticScene({ animated, toName }) {
       const w = canvas.width
       const h = canvas.height
       ensureTargets()
-      ctx.fillStyle = '#0a0a1a'
-      ctx.fillRect(0, 0, w, h)
+      ctx.clearRect(0, 0, w, h)
       frame++
+      ctx.shadowBlur = 4
+      ctx.shadowColor = 'rgba(244, 63, 94, 0.7)'
       for (const star of starsRef.current) {
         if (star.target) {
-          star.x += (star.target.x - star.x) * 0.01
-          star.y += (star.target.y - star.y) * 0.01
+          star.x += (star.target.x - star.x) * 0.015
+          star.y += (star.target.y - star.y) * 0.015
         } else {
           star.x += star.drift
           if (star.x > w) star.x = 0
           if (star.x < 0) star.x = w
         }
-        ctx.globalAlpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(frame * 0.03 + star.y))
-        ctx.fillStyle = '#ffd700'
+        ctx.globalAlpha = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(frame * 0.03 + star.y))
+        ctx.fillStyle = star.target ? '#fff5f7' : '#ffd700'
         ctx.beginPath()
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2)
+        ctx.arc(star.x, star.y, star.target ? star.size + 0.5 : star.size, 0, Math.PI * 2)
         ctx.fill()
       }
+      ctx.shadowBlur = 0
       ctx.globalAlpha = 1
     }
 
@@ -112,6 +115,7 @@ export default function RomanticScene({ animated, toName }) {
 
   return (
     <div className="relative w-full h-full overflow-hidden">
+      {animated && <FloatingHearts count={25} />}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
     </div>
   )

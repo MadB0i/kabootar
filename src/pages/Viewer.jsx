@@ -2,9 +2,12 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { decodeData } from '../lib/encode'
 import { decryptPayload } from '../lib/crypto'
 import { getOccasion } from '../templates'
+import getTheme from '../lib/getTheme'
 import useMediaQuery from '../lib/useMediaQuery'
 import MobileViewer from '../components/MobileViewer'
 import DesktopViewer from '../components/DesktopViewer'
+import EnvelopeOpening from '../components/EnvelopeOpening'
+import { startAmbientBGM, stopAmbientBGM, toggleMute, getMuteState } from '../lib/sound'
 
 function formatCountdown(target) {
   const diff = target - Date.now()
@@ -59,6 +62,32 @@ export default function Viewer({ data: raw }) {
     }
   }
 
+  const [envelopeOpened, setEnvelopeOpened] = useState(false)
+  const [muted, setMuted] = useState(getMuteState)
+
+  const viewerData = revealed
+    ? { ...decoded, from: revealed.from, to: revealed.to, message: revealed.message }
+    : decoded
+  const theme = getTheme(viewerData)
+
+  const handleOpenEnvelope = () => {
+    setEnvelopeOpened(true)
+    if (viewerData?.bgm) {
+      startAmbientBGM(viewerData.bgm)
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      stopAmbientBGM()
+    }
+  }, [])
+
+  const handleToggleAudio = () => {
+    const next = toggleMute()
+    setMuted(next)
+  }
+
   if (screen === 'broken') return <BrokenScreen />
   if (screen === 'locked') {
     const label = getOccasion(decoded?.occasion)?.label
@@ -77,11 +106,28 @@ export default function Viewer({ data: raw }) {
     )
   }
 
-  const viewerData = revealed
-    ? { ...decoded, from: revealed.from, to: revealed.to, message: revealed.message }
-    : decoded
+  if (!envelopeOpened) {
+    return (
+      <EnvelopeOpening
+        data={viewerData}
+        theme={theme}
+        onOpen={handleOpenEnvelope}
+      />
+    )
+  }
+
   return (
     <div className="relative w-full h-screen">
+      {/* Sound / Music Controls */}
+      <button
+        onClick={handleToggleAudio}
+        className="fixed top-3.5 right-3.5 z-40 px-3 py-1.5 rounded-full bg-black/35 hover:bg-black/55 text-white/90 text-xs font-semibold backdrop-blur-md ring-1 ring-white/15 shadow-lg flex items-center gap-1.5 transition pointer-events-auto"
+        aria-label={muted ? 'Unmute audio' : 'Mute audio'}
+      >
+        <span>{muted ? '🔇' : '🔊'}</span>
+        <span className="hidden sm:inline">{muted ? 'Muted' : 'Sound On'}</span>
+      </button>
+
       {viewerData.music && <BackgroundMusic src={viewerData.music} />}
       {isDesktop ? <DesktopViewer data={viewerData} /> : <MobileViewer data={viewerData} />}
     </div>

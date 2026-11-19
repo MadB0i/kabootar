@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import useCanvasSize from '../../lib/useCanvasSize'
 import Petals from '../effects/Petals'
+import { playSparkle, playNahiDodge } from '../../lib/sound'
 
 export default function SorryScene({ animated }) {
   const canvasRef = useRef(null)
@@ -27,16 +28,28 @@ export default function SorryScene({ animated }) {
     const drawFrame = () => {
       const w = canvas.width
       const h = canvas.height
-      ctx.fillStyle = '#1a1a2e'
-      ctx.fillRect(0, 0, w, h)
+      ctx.clearRect(0, 0, w, h)
       if (sunOut) {
+        const sunX = w * 0.84
+        const sunY = h * 0.16
+        const sunR = Math.min(w, h) * 0.09
+        const glow = ctx.createRadialGradient(sunX, sunY, sunR * 0.4, sunX, sunY, sunR * 2.2)
+        glow.addColorStop(0, 'rgba(255, 215, 0, 0.85)')
+        glow.addColorStop(0.5, 'rgba(255, 180, 0, 0.35)')
+        glow.addColorStop(1, 'rgba(255, 180, 0, 0)')
+        ctx.fillStyle = glow
+        ctx.beginPath()
+        ctx.arc(sunX, sunY, sunR * 2.2, 0, Math.PI * 2)
+        ctx.fill()
         ctx.fillStyle = '#ffd700'
         ctx.beginPath()
-        ctx.arc(w * 0.84, h * 0.16, Math.min(w, h) * 0.09, 0, Math.PI * 2)
+        ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2)
         ctx.fill()
         return
       }
-      ctx.strokeStyle = 'rgba(174,213,255,0.5)'
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.32)'
+      ctx.fillRect(0, 0, w, h)
+      ctx.strokeStyle = 'rgba(174, 213, 255, 0.65)'
       ctx.lineWidth = 1.5
       for (const d of dropsRef.current) {
         ctx.beginPath()
@@ -61,7 +74,10 @@ export default function SorryScene({ animated }) {
     return () => cancelAnimationFrame(raf)
   }, [animated, sunOut])
 
-  const handleForgive = () => setSunOut(true)
+  const handleForgive = () => {
+    setSunOut(true)
+    playSparkle()
+  }
 
   return (
     <div className="relative w-full h-full overflow-hidden">
@@ -110,6 +126,7 @@ function RunawayButton() {
   const [pos, setPos] = useState(null)
 
   const jump = useCallback(() => {
+    playNahiDodge()
     const rect = btnRef.current?.getBoundingClientRect()
     const vw = window.innerWidth
     const vh = window.innerHeight

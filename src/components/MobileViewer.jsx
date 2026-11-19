@@ -10,11 +10,14 @@ const SCENES = {
   birthday: () => import('./scenes/BirthdayScene'),
   romantic: () => import('./scenes/RomanticScene'),
   newyear: () => import('./scenes/NewYearScene'),
+  scratch: () => import('./scenes/ScratchScene'),
+  roast: () => import('./scenes/RoastScene'),
+  chai: () => import('./scenes/ChaiScene'),
   default: () => import('./scenes/DefaultScene'),
 }
 
 /** Scenes that put interactive elements near the bottom of the screen. */
-const INTERACTIVE_SCENES = new Set(['sorry', 'birthday'])
+const INTERACTIVE_SCENES = new Set(['sorry', 'birthday', 'scratch', 'roast', 'chai'])
 
 export default function MobileViewer({ data }) {
   const lines = parseLines(data)
@@ -22,9 +25,10 @@ export default function MobileViewer({ data }) {
   const reducedMotion = useReducedMotion()
   const transitionsOn = data.animated !== false && !reducedMotion
   const touchStart = useRef(null)
+  const lastTouchTime = useRef(0)
 
   const occasion = getOccasion(data.occasion)
-  const sceneKey = occasion?.scene || 'default'
+  const sceneKey = data.scene || occasion?.scene || 'default'
   const theme = getTheme(data)
   const occasionLabel = occasion?.label || data.occasionLabel || ''
   const totalCards = lines.length + 1 // +1 for reply card
@@ -42,6 +46,7 @@ export default function MobileViewer({ data }) {
     }
   }
   const handleTouchEnd = (e) => {
+    lastTouchTime.current = Date.now()
     const start = touchStart.current
     touchStart.current = null
     if (!start || start.interactive) return
@@ -67,6 +72,18 @@ export default function MobileViewer({ data }) {
     }
   }
 
+  const handleClick = (e) => {
+    // Avoid double-firing immediately after touch
+    if (Date.now() - lastTouchTime.current < 500) return
+    if (e.target?.closest?.('button, a, [data-interactive]')) return
+    if (bottomReserved && e.clientY > window.innerHeight * 0.65) return
+    if (e.clientX < window.innerWidth / 3) {
+      if (current > 0) setCurrent((c) => c - 1)
+    } else if (e.clientX > (window.innerWidth * 2) / 3) {
+      if (current < totalCards - 1) setCurrent((c) => c + 1)
+    }
+  }
+
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowRight' && current < totalCards - 1) setCurrent((c) => c + 1)
     if (e.key === 'ArrowLeft' && current > 0) setCurrent((c) => c - 1)
@@ -80,16 +97,44 @@ export default function MobileViewer({ data }) {
       style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
-      {/* Progress bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-black/20 z-20 pointer-events-none">
-        <div
-          className="h-full bg-gradient-to-r from-pink-400 via-violet-300 to-cyan-300 transition-all duration-300"
-          style={{ width: `${((current + 1) / totalCards) * 100}%` }}
-        />
+      {/* Instagram-style segmented story progress bars */}
+      <div className="absolute top-2.5 left-3 right-3 flex gap-1.5 z-30 pointer-events-none">
+        {Array.from({ length: totalCards }, (_, i) => (
+          <div key={i} className="flex-1 h-1 rounded-full overflow-hidden bg-black/25 backdrop-blur-sm">
+            <div
+              className={`h-full transition-all duration-300 ${
+                i <= current
+                  ? 'bg-gradient-to-r from-pink-400 via-violet-300 to-cyan-300 w-full'
+                  : 'w-0'
+              }`}
+            />
+          </div>
+        ))}
       </div>
+
+      {/* Subtle navigation arrows */}
+      {current > 0 && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setCurrent((c) => c - 1) }}
+          aria-label="Previous card"
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/25 hover:bg-black/45 text-white/80 hover:text-white flex items-center justify-center backdrop-blur-md transition pointer-events-auto text-lg leading-none"
+        >
+          ‹
+        </button>
+      )}
+      {current < totalCards - 1 && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setCurrent((c) => c + 1) }}
+          aria-label="Next card"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/25 hover:bg-black/45 text-white/80 hover:text-white flex items-center justify-center backdrop-blur-md transition pointer-events-auto text-lg leading-none"
+        >
+          ›
+        </button>
+      )}
 
       {/* Scene layer: receives no events itself, but interactive elements
           inside scenes re-enable them with pointer-events-auto. */}
@@ -138,6 +183,9 @@ function renderCard({ current, lines, data, theme, occasionLabel, totalCards, is
         <p className="text-xl leading-relaxed whitespace-pre-line px-4" style={{ color: theme.text }}>
           {firstLine}
         </p>
+        {data.from && lines.length === 1 && (
+          <p className="mt-6 text-white/60 text-sm">— {data.from}</p>
+        )}
       </div>
     )
   }
@@ -147,6 +195,9 @@ function renderCard({ current, lines, data, theme, occasionLabel, totalCards, is
         <p className="text-xl leading-relaxed whitespace-pre-line px-4" style={{ color: theme.text }}>
           {fillNames(lines[current] || '', data)}
         </p>
+        {data.from && current === lines.length - 1 && (
+          <p className="mt-6 text-white/60 text-sm">— {data.from}</p>
+        )}
       </div>
     )
   }
@@ -169,7 +220,7 @@ function DynamicScene({ sceneKey, data, animated }) {
 }
 
 function ReplyCard({ data, theme }) {
-  const replyText = encodeURIComponent(`Hey ${data.to}! Saw your kabootar 💌 — made by ${data.from}`)
+  const replyText = encodeURIComponent(`Hey ${data.from || 'there'}! Loved your kabootar 💌`)
   return (
     <div className="text-center text-white bg-black/35 backdrop-blur-md rounded-3xl px-6 py-8 ring-1 ring-white/15 shadow-2xl max-w-md">
       <p className="text-2xl font-bold mb-6" style={{ color: theme.text }}>💌</p>
