@@ -4,96 +4,105 @@
 
 **Send a *feeling*, not just a text.**
 
-Animated greeting cards for every occasion — living inside **one link**.
-No app. No signup. No server. No tracking.
+Animated greeting cards & interactive secret links living inside a single URL fragment.  
+**No server. No database. No accounts. 100% client-side.**
 
-[![Deploy to GitHub Pages](https://github.com/madb0i/kabootar/actions/workflows/deploy.yml/badge.svg)](https://github.com/madb0i/kabootar/actions/workflows/deploy.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-ee0979?style=flat-square)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-22d3ee?style=flat-square)](CONTRIBUTING.md)
-[![Zero Backend](https://img.shields.io/badge/backend-none-8b5cf6?style=flat-square)](#privacy)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-madb0i.github.io%2Fkabootar-ff758c?style=for-the-badge&logo=google-chrome&logoColor=white)](https://madb0i.github.io/kabootar/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-a18cd1?style=for-the-badge)](LICENSE)
+[![Zero Backend](https://img.shields.io/badge/Backend-Zero%20(Pure%20URL)-4ecdc4?style=for-the-badge)](#-how-it-works)
+[![Web Crypto](https://img.shields.io/badge/Encryption-AES--GCM%20256-ffd166?style=for-the-badge)](#-security--privacy)
 
-**[🎉 Open the live demo →](https://madb0i.github.io/kabootar/)**
-
-![Kabootar creator](docs/screenshots/creator.png)
-
-*[Interactive rain scene — mobile](docs/screenshots/sorry-mobile.png) · [Star-formed names](docs/screenshots/romantic-mobile.png) · [Fireworks](docs/screenshots/newyear.png)*
-
-<p>
-  <img src="docs/screenshots/sorry-mobile.png" width="180" alt="Sorry scene with rain and a runaway button" />
-  <img src="docs/screenshots/romantic-mobile.png" width="180" alt="Romantic scene where stars form a name" />
-  <img src="docs/screenshots/newyear.png" width="180" alt="New Year fireworks scene" />
-</p>
+---
 
 </div>
 
-## ✨ Why this is different
+## ✨ What makes Kabootar special?
 
-- **Zero backend.** Your message never touches a server — it's encoded directly in the link hash. The link *is* the message.
-- **Encrypted secret questions.** Lock a card behind PBKDF2 + AES-GCM — the payload is ciphertext; only the right answer decrypts it, right in the browser.
-- **Interactive scenes.** A runaway "Nahi" button, birthday candles you can actually blow out (mic or tap), stars that assemble into a name, fireworks for the new year.
-- **India-first occasions.** Bihu (with Assamese messages), Diwali, Eid, Rakhi, Karwa Chauth out of the box — plus Sorry, Romantic, Birthday, New Year, Anniversary.
-- **Installable + offline.** PWA manifest and an offline shell — once you've opened a card, it keeps working without a network.
-- **Motion with manners.** Full framer-motion transitions that switch themselves off for `prefers-reduced-motion`.
+- 💌 **Wax-Seal Opening Ceremony** — A 3D airmail envelope with an authentic wax seal. Tapping the seal breaks it with tactile sound and haptics, sliding the folded letter into the story deck.
+- 🪙 **Interactive Scratch Cards** — A shimmering metallic foil card you can scratch with your finger or mouse to reveal hidden confessions and surprises.
+- 📸 **1-Click Story Cards & QR Codes** — Download high-resolution 9:16 vertical cards with embedded scannable QR codes ready to post on Instagram Stories or WhatsApp Status.
+- 🎧 **Generative Web Audio Synthesizer** — Zero external audio files. Generates ambient Lo-Fi chords, celestial music box melodies, and tactile SFX (wax crack, candle blow, fireworks) using pure browser Web Audio.
+- 🔒 **Encrypted Secret Questions** — Lock any card with client-side **PBKDF2 + AES-GCM**. The payload is ciphertext; only the recipient with the right answer can decrypt it.
+- 🎭 **Interactive Mini-Games & Scenes**:
+  - **Sorry**: Runaway *"Nahi"* button that dodges the cursor until they forgive you.
+  - **Birthday**: 3D cake with candles you can blow out via microphone or tap.
+  - **Crush & Secret**: Metallic gold scratch foil confession.
+  - **Bestie Roast**: An interactive *"Chaos / Unhinged Meter"* for playful banter.
+  - **Romantic**: Shimmering night sky stars that assemble into the recipient's name.
+  - **Chai Date**: Steaming cutting chai glass with tap-to-brew heart steam.
+  - **New Year**: Interactive midnight fireworks with click-to-burst particles.
+- 🇮🇳 **Culturally Rich Templates** — Diwali, Eid, Bihu, Rakhi, Karwa Chauth, Anniversary, Birthday, Sorry, and Custom cards out of the box.
+
+---
 
 ## 🚀 How it works
 
+Kabootar is **serverless by design**. The link *is* the message.
+
 ```mermaid
 flowchart LR
-    A["Pick an occasion<br/>+ theme"] --> B["Write your message<br/>{to} / {from} get filled"]
-    B --> C{"Secret<br/>question?"}
-    C -- yes --> D["AES-GCM encrypt<br/>inside the browser"]
-    C -- no --> E
-    D --> E["One link 🔗"]
-    E --> F["They open it —<br/>scene plays, card reveals"]
+    A["Choose Occasion<br/>& Theme"] --> B["Write Message<br/>+ Ambient Audio"]
+    B --> C{"Secret<br/>Question?"}
+    C -- Yes --> D["WebCrypto AES-GCM<br/>(Client-Side)"]
+    C -- No --> E["Base64 URL Hash"]
+    D --> E
+    E --> F["One Shareable Link 🔗<br/>(#/v/...)"]
+    F --> G["Recipient Opens<br/>3D Wax Seal Breaks<br/>Card Unfolds"]
 ```
 
-Everything (names, message, theme, scene, the encrypted secret) travels **inside the URL fragment**. Nothing is ever uploaded.
+All data travels safely in the URL fragment (`window.location.hash`). Nothing is ever sent to a remote server.
 
-## 🎁 Features
+---
 
-| Feature | Details |
-|---|---|
-| Occasions | Sorry, Romantic, Birthday, New Year, Anniversary, Custom + Bihu, Diwali, Eid, Rakhi, Karwa Chauth |
-| Themes | Per-occasion gradient palettes with a live preview while you type |
-| Animations | Floating particles, confetti, fireworks, petals, stars — toggle off anytime |
-| Time locks | Soft unlock-at date/time with a live countdown |
-| Secret questions | Web Crypto (PBKDF2 + AES-GCM) encrypted payload behind a question |
-| Music | Optional background audio — never autoplays, one-tap toggle |
-| Mobile & desktop | Swipeable cards on mobile, scroll-snapped scenes with dots + keyboard on desktop |
-| Reply loop | One-tap WhatsApp reply and a "Make your own" CTA on every card |
-| Share | Native share sheet on mobile, copy-with-confetti everywhere else |
+## 🛠️ Tech Stack
 
-## 🛠️ Tech stack
+- **Framework**: [React 19](https://react.dev/) + [Vite 8](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Motion & 3D Gestures**: [Framer Motion](https://www.framer.com/motion/)
+- **Sound Design**: Native Web Audio API (100% offline, procedural sound synthesis)
+- **Cryptography**: Web Crypto API (PBKDF2 with 200,000 iterations + AES-GCM 256-bit)
+- **Offline / PWA**: Service Worker with offline caching & installable web app manifest
+- **Deployment**: Automated GitHub Pages workflow
 
-- **Vite 8** + **React 19** + **Tailwind CSS v4** (`@tailwindcss/vite`)
-- **Framer Motion** — card transitions and reveals
-- **Web Crypto API** — PBKDF2 (200k iterations) + AES-GCM, zero libraries
-- **Hash-based routing** (`#/`, `#/v/<data>`) — no router, works from any static host
-- **Canvas scenes** — DPR-aware, ResizeObserver-driven, single rAF loop each
-- **PWA** — manifest + tiny service worker (network-first shell, cache-first assets)
+---
 
-## 🧞 Add your own occasion
+## ⚡ Quickstart
 
-See [`docs/ADD_OCCASION.md`](docs/ADD_OCCASION.md). Drop one JS file into `src/templates/` — it registers itself.
-
-## 🌍 Self-host
-
-1. Fork the repo.
-2. **Settings → Pages → Source: GitHub Actions**.
-3. Push to `main`. The [deploy workflow](.github/workflows/deploy.yml) builds with `npm ci && npm run build` and publishes `dist/`.
-4. Done — your instance is live at `https://<you>.github.io/kabootar/`.
-
-Or run it locally:
+Run your own instance locally in seconds:
 
 ```bash
-npm ci
+# Clone the repository
+git clone https://github.com/MadB0i/kabootar.git
+cd kabootar
+
+# Install dependencies
+npm install
+
+# Start local dev server
 npm run dev
 ```
 
-## 🔒 Privacy
+Visit `http://localhost:5173/kabootar/` in your browser.
 
-Your message exists **only inside the URL**. Nothing is sent to any server — there isn't one. Secret-question encryption runs entirely in your browser via the Web Crypto API. No analytics, no cookies, no accounts.
+### Building for Production
+
+```bash
+npm run build
+npm run preview
+```
+
+---
+
+## 🔒 Security & Privacy
+
+- **Zero Tracking**: No cookies, no third-party trackers, no analytics.
+- **Zero Server Storage**: No database or backend API exists. If you lose the link, the message cannot be recovered.
+- **End-to-End Client Encryption**: When a secret question is enabled, the plaintext is encrypted with AES-GCM using a key derived from the answer via PBKDF2.
+
+---
 
 ## 📄 License
 
-[MIT](LICENSE) · Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+
+Made with 🕊️ by [MadB0i](https://github.com/MadB0i).
